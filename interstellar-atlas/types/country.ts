@@ -1,3 +1,5 @@
+export type Region = |"Africa" | "Americas" | "Asia" |"Europe"| "Oceania" | "Antarctic"
+
 export interface Country{
     names: {
         common: string;
@@ -6,7 +8,5 @@ export interface Country{
         url_svg: string;
     };
     population: number;
-    region: string;
-
-
+    region: Region;
 }
