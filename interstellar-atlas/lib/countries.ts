@@ -2,6 +2,8 @@ import type { Country } from "../types/country";
 
 const API_URL = "https://api.restcountries.com/countries/v5";
 const API_KEY = process.env.REST_COUNTRIES_API_KEY;
+console.log("API KEY EXISTS:", Boolean(API_KEY));
+
 
 interface CountriesResponse {
   data: {

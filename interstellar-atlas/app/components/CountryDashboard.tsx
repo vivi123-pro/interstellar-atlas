@@ -2,10 +2,8 @@
 
 import { useState } from "react";
 import type { Country, Region } from "@/types/country";
+import { useQuery } from "@tanstack/react-query";
 
-interface CountryDashboardProps {
-  countries: Country[];
-}
 
 const regions: Region[] = [
   "Africa",
@@ -22,12 +20,39 @@ function isRegion(value: string): value is Region {
   return regions.some((region) => region === value);
 }
 
-export default function CountryDashboard({
-  countries,
-}: CountryDashboardProps) {
+
+export default function CountryDashboard() {  
+
+  const fetchCountries = async (): Promise<Country[]> => {
+  const response = await fetch("/api/countries");
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch countries");
+  }
+
+  return response.json();
+};
+
+  const { data: countries, isLoading, isError } = useQuery<Country[]>({
+  queryKey: ["countries"],
+  queryFn: fetchCountries,
+});
+  
   const [search, setSearch] = useState<string>("");
   const [selectedRegion, setSelectedRegion] = useState<Region | "">("");
   const [page, setPage] = useState<number>(1);
+
+  if (isLoading) {
+  return <p>Loading...</p>;
+}
+
+if (isError) {
+  return <p>Something went wrong.</p>;
+}
+
+if (!countries) {
+  return <p>No countries available.</p>;
+}
 
   // Search + region filter
   const filteredCountries = countries.filter((country) => {

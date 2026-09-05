@@ -1,8 +1,6 @@
-import { getCountries} from "@/lib/countries";
 import CountryDashboard from "./components/CountryDashboard";
 
-export default async function Home() {
-  const countries = await getCountries();
+export default function Home() {
 
-  return <CountryDashboard countries={countries}/>
+  return <CountryDashboard/>
 }
