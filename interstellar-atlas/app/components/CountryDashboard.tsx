@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { Country, Region } from "@/types/country";
 import { useQuery } from "@tanstack/react-query";
+import { countriesQueryKey } from "@/lib/countries";
 
 
 const regions: Region[] = [
@@ -34,7 +35,7 @@ export default function CountryDashboard() {
 };
 
   const { data: countries, isLoading, isError } = useQuery<Country[]>({
-  queryKey: ["countries"],
+  queryKey: countriesQueryKey,
   queryFn: fetchCountries,
 });
   
