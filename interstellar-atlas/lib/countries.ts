@@ -17,6 +17,10 @@ interface CountriesResponse {
   };
 }
 
+function isObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
 function isCountry(value: unknown): value is Country {
   if (typeof value !== "object" || value === null) {
     return false;
@@ -54,6 +58,15 @@ function isCountry(value: unknown): value is Country {
 if (
   !("region" in value) ||
   typeof value.region !== "string"
+) {
+  return false;
+}
+
+if (
+  !("codes" in value) ||
+  !isObject(value.codes) ||
+  !("alpha_3" in value.codes) ||
+  typeof value.codes.alpha_3 !== "string"
 ) {
   return false;
 }
@@ -128,3 +141,17 @@ export async function getCountries() {
   return allCountries;
 }
 
+export async function getCountryByCode(code: string) {
+  const countries = await getCountries();
+
+  const country = countries.find(
+    (country) =>
+      country.codes.alpha_3.toUpperCase() === code.toUpperCase()
+  );
+
+  if (!country) {
+    throw new Error("Country not found");
+  }
+
+  return country;
+}
