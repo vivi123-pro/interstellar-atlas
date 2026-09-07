@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useCountry } from "../hooks/useCountry";
+import { useCountriesByCodes } from "../hooks/useCountriesByCodes";
+
 
 interface CountryDetailsProps {
   code: string;
@@ -258,29 +260,33 @@ export default function CountryDetails({
             </span>
           </div>
 
-          {country.borders.length > 0 ? (
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              {country.borders.map((border) => (
-                <Link
-                  key={border}
-                  href={`/country/${border}`}
-                  className="group flex items-center justify-between rounded-2xl border border-sky-100 bg-sky-50 px-4 py-4 transition duration-200 hover:-translate-y-1 hover:border-sky-300 hover:bg-sky-100 hover:shadow-md"
-                >
-                  <span className="font-bold text-sky-950">
-                    {border}
-                  </span>
+             {isBordersLoading ? (
+              <p className="text-sm text-zinc-500">
+               Loading border countries...
+    </p>
+) : borderCountries.length > 0 ? (
+  <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+    {borderCountries.map((borderCountry) => (
+      <Link
+        key={borderCountry.codes.alpha_3}
+        href={`/country/${borderCountry.codes.alpha_3}`}
+        className="group flex items-center justify-between rounded-2xl border border-sky-100 bg-sky-50 px-4 py-4 transition duration-200 hover:-translate-y-1 hover:border-sky-300 hover:bg-sky-100 hover:shadow-md"
+      >
+        <span className="font-bold text-sky-950">
+          {borderCountry.names.common}
+        </span>
 
-                  <span className="text-sky-400 transition group-hover:translate-x-1">
-                    →
-                  </span>
-                </Link>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-zinc-500">
-              This country has no land borders.
-            </p>
-          )}
+        <span className="text-sky-400 transition group-hover:translate-x-1">
+          →
+        </span>
+      </Link>
+    ))}
+  </div>
+) : (
+  <p className="text-sm text-zinc-500">
+    This country has no land borders.
+  </p>
+)} 
         </section>
       </div>
     </main>
