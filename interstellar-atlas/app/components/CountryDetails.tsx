@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { CountryApiError } from "@/lib/countries";
 import { useCountry } from "../hooks/useCountry";
 import { useCountriesByCodes } from "../hooks/useCountriesByCodes";
 
@@ -12,7 +13,17 @@ interface CountryDetailsProps {
 export default function CountryDetails({
   code,
 }: CountryDetailsProps) {
-  const { data: country, isLoading, isError } = useCountry(code);
+  const {
+  data: country,
+  isLoading,
+  isError,
+  error,
+} = useCountry(code);
+
+const {
+  data: borderCountries = [],
+  isLoading: isBordersLoading,
+} = useCountriesByCodes(country?.borders ?? []);
 
   if (isLoading) {
     return (
@@ -32,7 +43,26 @@ export default function CountryDetails({
     );
   }
 
-  if (isError || !country) {
+if (isError || !country) {
+  const status =
+    error instanceof CountryApiError
+      ? error.status
+      : undefined;
+
+  const title =
+    status === 404
+      ? "Country not found"
+      : status === 429
+        ? "Too many requests"
+        : "Something went wrong";
+
+  const message =
+    status === 404
+      ? "We couldn't find a country with that code."
+      : status === 429
+        ? "Too many requests were made. Please try again shortly."
+        : "We couldn't load the information for this country.";
+
     return (
       <main className="relative min-h-screen overflow-hidden bg-sky-200 p-8">
         <div className="relative z-10 mx-auto max-w-5xl">
@@ -43,13 +73,13 @@ export default function CountryDetails({
             ← Back to Atlas
           </Link>
 
-          <div className="mt-20 rounded-3xl bg-white/80 p-10 text-center shadow-xl backdrop-blur-md">
-            <h1 className="text-3xl font-bold text-sky-950">
-              Country not found
-            </h1>
+         <div className="mt-20 rounded-3xl bg-white/80 p-10 text-center shadow-xl backdrop-blur-md">
+             <h1 className="text-3xl font-bold text-sky-950">
+                {title}
+             </h1>
 
             <p className="mt-3 text-zinc-500">
-              We couldn't load the information for this country.
+                {message}
             </p>
           </div>
         </div>
@@ -93,11 +123,17 @@ export default function CountryDetails({
           <div className="relative flex flex-col gap-8 sm:flex-row sm:items-center">
             {/* Flag */}
             <div className="overflow-hidden rounded-2xl bg-white shadow-xl sm:h-40 sm:w-60">
+              {country.flag.url_svg ? (
               <img
-                src={country.flag.url_svg}
-                alt={`${country.names.common} flag`}
-                className="h-full w-full object-cover"
+               src={country.flag.url_svg}
+               alt={`${country.names.common} flag`}
+              className="h-full w-full object-cover"
               />
+                ) : (
+             <div className="flex h-full w-full items-center justify-center text-xs text-sky-400">
+             No flag
+            </div>
+             )}
             </div>
 
             {/* Country heading */}

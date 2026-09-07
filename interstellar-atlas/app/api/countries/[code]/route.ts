@@ -20,6 +20,16 @@ export async function GET(
   } catch (error) {
     console.error("COUNTRY API ERROR:", error);
 
+    if (
+      error instanceof Error &&
+      error.message === "Country not found"
+    ) {
+      return NextResponse.json(
+        { error: "Country not found" },
+        { status: 404 }
+      );
+    }
+
     return NextResponse.json(
       { error: "Failed to fetch country" },
       { status: 500 }
