@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
-import { getCountryByCode } from "@/lib/countries";
+import {
+  getCountryByCode,
+  CountryApiError,
+} from "@/lib/countries";
 
 interface CountryRouteContext {
-  params: Promise<{
-    code: string;
-  }>;
+  params: Promise<{ code: string }>;
 }
 
 export async function GET(
@@ -18,7 +19,12 @@ export async function GET(
 
     return NextResponse.json(country);
   } catch (error) {
-    console.error("COUNTRY API ERROR:", error);
+    if (error instanceof CountryApiError) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: error.status }
+      );
+    }
 
     return NextResponse.json(
       { error: "Failed to fetch country" },

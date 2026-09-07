@@ -6,6 +6,15 @@ import {
 const API_URL = "https://api.restcountries.com/countries/v5";
 const API_KEY = process.env.REST_COUNTRIES_API_KEY;
 
+export class CountryApiError extends Error {
+  constructor(
+    message: string,
+    public status: number
+  ) {
+    super(message);
+    this.name = "CountryApiError";
+  }
+}
 
 interface CountriesResponse {
   data: {
@@ -197,11 +206,18 @@ export async function getCountries() {
       }
     );
 
-    const result: unknown = await response.json();
+    if (!response.ok) {
+  throw new CountryApiError(
+    "Failed to fetch countries",
+    response.status
+  );
+}
 
-    if (!isCountriesResponse(result)) {
-      throw new Error("Invalid countries response");
-      }
+const result: unknown = await response.json();
+
+if (!isCountriesResponse(result)) {
+  throw new Error("Invalid countries response");
+}
 
     allCountries.push(...result.data.objects);
 
@@ -224,8 +240,11 @@ export async function getCountryByCode(code: string) {
   );
 
   if (!country) {
-    throw new Error("Country not found");
-  }
+  throw new CountryApiError(
+    "Country not found",
+    404
+  );
+}
 
   return country;
 }
