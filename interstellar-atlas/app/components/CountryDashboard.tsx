@@ -5,6 +5,7 @@ import { useState } from "react";
 import type { Country, Region } from "@/types/country";
 import { useQuery } from "@tanstack/react-query";
 import { countriesQueryKey } from "@/lib/countries";
+import Image from "next/image";
 
 const regions: Region[] = [
   "Africa",
@@ -248,12 +249,22 @@ export default function CountryDashboard() {
               >
                 <article className="flex items-center gap-4 rounded-2xl border border-white/80 bg-white/90 p-4 shadow-md shadow-sky-900/5 backdrop-blur-md transition duration-200 hover:-translate-y-1 hover:bg-white hover:shadow-xl sm:gap-6 sm:p-5">
                   {/* Flag */}
+
                   <div className="h-14 w-20 shrink-0 overflow-hidden rounded-xl bg-sky-50 shadow-sm sm:h-16 sm:w-24">
-                    <img
-                      src={country.flag.url_svg}
-                      alt={`${country.names.common} flag`}
-                      className="h-full w-full object-cover"
-                    />
+
+                    {country.flag.url_svg ? (
+                      <Image
+                       src={country.flag.url_svg}
+                       alt={`${country.names.common} flag`}
+                       width={240}
+                       height={160}
+                       className="h-full w-full object-cover"
+                       />
+                      ) : (
+                      <div className="flex h-full w-full items-center justify-center">
+                       No flag available
+                    </div>
+                     )}
                   </div>
 
                   {/* Country information */}

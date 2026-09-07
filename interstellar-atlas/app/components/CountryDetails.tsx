@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCountry } from "../hooks/useCountry";
 import { useCountriesByCodes } from "../hooks/useCountriesByCodes";
+import Image from "next/image";
 
 
 interface CountryDetailsProps {
@@ -13,6 +14,11 @@ export default function CountryDetails({
   code,
 }: CountryDetailsProps) {
   const { data: country, isLoading, isError } = useCountry(code);
+  const {
+  data: borderCountries = [],
+  isLoading: isBordersLoading,
+} = useCountriesByCodes(country?.borders ?? []);
+
 
   if (isLoading) {
     return (
@@ -93,11 +99,19 @@ export default function CountryDetails({
           <div className="relative flex flex-col gap-8 sm:flex-row sm:items-center">
             {/* Flag */}
             <div className="overflow-hidden rounded-2xl bg-white shadow-xl sm:h-40 sm:w-60">
-              <img
-                src={country.flag.url_svg}
-                alt={`${country.names.common} flag`}
-                className="h-full w-full object-cover"
-              />
+                {country.flag.url_svg ? (
+                <Image
+                 src={country.flag.url_svg}
+                 alt={`${country.names.common} flag`}
+                 width={240}
+                 height={160}
+                 className="h-full w-full object-cover"
+                 />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center">
+                        No flag available
+                </div>
+              )}
             </div>
 
             {/* Country heading */}
