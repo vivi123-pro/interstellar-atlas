@@ -1,4 +1,14 @@
-import type { Country } from "../types/country";
+import { isRegion, type Country } from "@/types/country";
+
+export class CountryApiError extends Error {
+  constructor(
+    message: string,
+    public status: number
+  ) {
+    super(message);
+    this.name = "CountryApiError";
+  }
+}
 
 const API_URL = "https://api.restcountries.com/countries/v5";
 const API_KEY = process.env.REST_COUNTRIES_API_KEY;
@@ -53,7 +63,8 @@ function isCountry(value: unknown): value is Country {
 
 if (
   !("region" in value) ||
-  typeof value.region !== "string"
+  typeof value.region !== "string" ||
+  !isRegion(value.region)
 ) {
   return false;
 }
@@ -109,6 +120,13 @@ export async function getCountries() {
         },
       }
     );
+
+    if (!response.ok) {
+    throw new CountryApiError(
+    "Failed to fetch countries",
+    response.status
+  );
+      }
 
     const result: unknown = await response.json();
 
