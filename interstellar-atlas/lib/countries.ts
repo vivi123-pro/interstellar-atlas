@@ -132,12 +132,18 @@ export async function getCountries() {
       }
     );
 
-    const result: unknown = await response.json();
+  if (!response.ok) {
+  throw new CountryApiError(
+    "Failed to fetch countries",
+    response.status
+  );
+  }
 
-    if (!isCountriesResponse(result)) {
-      throw new Error("Invalid countries response");
-      }
+  const result: unknown = await response.json();
 
+   if (!isCountriesResponse(result)) {
+     throw new Error("Invalid countries response");
+    }
     allCountries.push(...result.data.objects);
 
     if (!result.data.meta.more) {
@@ -159,8 +165,11 @@ export async function getCountryByCode(code: string) {
   );
 
   if (!country) {
-    throw new Error("Country not found");
-  }
+  throw new CountryApiError(
+    "Country not found",
+    404
+  );
+ }
 
   return country;
 }
