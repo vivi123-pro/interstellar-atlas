@@ -32,6 +32,7 @@ interface CountriesResponse {
 function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
+// Validate unknown API data before treating it as a Country.
 function isCountry(value: unknown): value is Country {
   if (!isObject(value)) {
     return false;
@@ -157,7 +158,6 @@ function isCountry(value: unknown): value is Country {
 
   return true;
 }
-
 
 function isCountriesResponse(value: unknown): value is CountriesResponse {
   if (typeof value !== "object" || value === null) {
