@@ -1,4 +1,7 @@
-import { isRegion, type Country } from "@/types/country";
+import type { Country } from "../types/country";
+
+const API_URL = "https://api.restcountries.com/countries/v5";
+const API_KEY = process.env.REST_COUNTRIES_API_KEY;
 
 export class CountryApiError extends Error {
   constructor(
@@ -9,10 +12,6 @@ export class CountryApiError extends Error {
     this.name = "CountryApiError";
   }
 }
-
-const API_URL = "https://api.restcountries.com/countries/v5";
-const API_KEY = process.env.REST_COUNTRIES_API_KEY;
-
 
 interface CountriesResponse {
   data: {
@@ -27,7 +26,10 @@ interface CountriesResponse {
   };
 }
 
-// Validate unknown API data before treating it as a Country.
+function isObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
 function isCountry(value: unknown): value is Country {
   if (typeof value !== "object" || value === null) {
     return false;
@@ -64,8 +66,16 @@ function isCountry(value: unknown): value is Country {
 
 if (
   !("region" in value) ||
-  typeof value.region !== "string" ||
-  !isRegion(value.region)
+  typeof value.region !== "string"
+) {
+  return false;
+}
+
+if (
+  !("codes" in value) ||
+  !isObject(value.codes) ||
+  !("alpha_3" in value.codes) ||
+  typeof value.codes.alpha_3 !== "string"
 ) {
   return false;
 }
@@ -122,19 +132,18 @@ export async function getCountries() {
       }
     );
 
-    if (!response.ok) {
-    throw new CountryApiError(
+  if (!response.ok) {
+  throw new CountryApiError(
     "Failed to fetch countries",
     response.status
   );
-      }
+  }
 
-    const result: unknown = await response.json();
+  const result: unknown = await response.json();
 
-    if (!isCountriesResponse(result)) {
-      throw new Error("Invalid countries response");
-      }
-
+   if (!isCountriesResponse(result)) {
+     throw new Error("Invalid countries response");
+    }
     allCountries.push(...result.data.objects);
 
     if (!result.data.meta.more) {
@@ -147,3 +156,20 @@ export async function getCountries() {
   return allCountries;
 }
 
+export async function getCountryByCode(code: string) {
+  const countries = await getCountries();
+
+  const country = countries.find(
+    (country) =>
+      country.codes.alpha_3.toUpperCase() === code.toUpperCase()
+  );
+
+  if (!country) {
+  throw new CountryApiError(
+    "Country not found",
+    404
+  );
+ }
+
+  return country;
+}

@@ -9,17 +9,17 @@ export async function GET() {
     const countries = await getCountries();
 
     return NextResponse.json(countries);
-  } catch (error) {
-       if (error instanceof CountryApiError) {
-       return NextResponse.json(
-       { error: error.message },
+  }  catch (error) {
+    if (error instanceof CountryApiError) {
+      return NextResponse.json(
+        { error: error.message },
         { status: error.status }
-        );
+      );
     }
 
-  return NextResponse.json(
-    { error: "Failed to fetch countries" },
-    { status: 500 }
-  );
-}
-}
+    return NextResponse.json(
+      { error: "Failed to fetch countries" },
+      { status: 500 }
+    );
+  }}
+  
