@@ -21,5 +21,5 @@ export async function GET() {
       { error: "Failed to fetch countries" },
       { status: 500 }
     );
-  }}
-  
+  }
+}
