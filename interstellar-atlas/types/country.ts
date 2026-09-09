@@ -6,6 +6,19 @@ export type Region =
   | "Oceania"
   | "Antarctic";
 
+const regions: Region[] = [
+  "Africa",
+  "Americas",
+  "Asia",
+  "Europe",
+  "Oceania",
+  "Antarctic",
+];
+
+export function isRegion(value: string): value is Region {
+  return regions.some((region) => region === value);
+}
+
 interface NativeName {
   common: string;
   official: string;
@@ -39,8 +52,8 @@ export interface Country {
   population: number;
 
   codes: {
-  alpha_3: string;
-};
+    alpha_3: string;
+  };
 
   region: Region;
 
