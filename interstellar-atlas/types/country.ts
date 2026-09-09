@@ -44,19 +44,14 @@ export interface Country {
     common: string;
     native: Record<string, NativeName>;
   };
-
   flag: {
     url_svg: string;
   };
-
   population: number;
-
   codes: {
     alpha_3: string;
   };
-
   region: Region;
-
   subregion: string;
   capitals: Capital[];
   tlds: string[];

@@ -1,4 +1,7 @@
-import type { Country } from "../types/country";
+import {
+  isRegion,
+  type Country,
+} from "../types/country";
 
 const API_URL = "https://api.restcountries.com/countries/v5";
 const API_KEY = process.env.REST_COUNTRIES_API_KEY;
@@ -29,61 +32,132 @@ interface CountriesResponse {
 function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
-
+// Validate unknown API data before treating it as a Country.
 function isCountry(value: unknown): value is Country {
-  if (typeof value !== "object" || value === null) {
+  if (!isObject(value)) {
     return false;
   }
 
-  if (!("names" in value) || !("flag" in value)) {
+  if (!isObject(value.names)) {
     return false;
   }
 
   if (
-    typeof value.names !== "object" ||
-    value.names === null ||
-    !("common" in value.names) ||
-    typeof value.names.common !== "string"
+    typeof value.names.common !== "string" ||
+    !isObject(value.names.native)
   ) {
     return false;
   }
 
-  if (
-    typeof value.flag !== "object" ||
-    value.flag === null ||
-    !("url_svg" in value.flag) ||
-    typeof value.flag.url_svg !== "string"
-  ) {
+  for (const nativeName of Object.values(value.names.native)) {
+    if (
+      !isObject(nativeName) ||
+      typeof nativeName.common !== "string" ||
+      typeof nativeName.official !== "string"
+    ) {
+      return false;
+    }
+  }
+
+  if (!isObject(value.flag)) {
+    return false;
+  }
+
+  if (typeof value.flag.url_svg !== "string") {
+    return false;
+  }
+
+  if (typeof value.population !== "number") {
+    return false;
+  }
+
+  if (!isObject(value.codes)) {
+    return false;
+  }
+
+  if (typeof value.codes.alpha_3 !== "string") {
     return false;
   }
 
   if (
-  !("population" in value) ||
-  typeof value.population !== "number"
-) {
-  return false;
-}
+    typeof value.region !== "string" ||
+    !isRegion(value.region)
+  ) {
+    return false;
+  }
 
-if (
-  !("region" in value) ||
-  typeof value.region !== "string"
-) {
-  return false;
-}
+  if (typeof value.subregion !== "string") {
+    return false;
+  }
 
-if (
-  !("codes" in value) ||
-  !isObject(value.codes) ||
-  !("alpha_3" in value.codes) ||
-  typeof value.codes.alpha_3 !== "string"
-) {
-  return false;
-}
+  if (!Array.isArray(value.capitals)) {
+    return false;
+  }
+
+  for (const capital of value.capitals) {
+    if (
+      !isObject(capital) ||
+      typeof capital.name !== "string"
+    ) {
+      return false;
+    }
+  }
+
+  if (!Array.isArray(value.tlds)) {
+    return false;
+  }
+
+  if (
+    !value.tlds.every(
+      (tld): tld is string => typeof tld === "string"
+    )
+  ) {
+    return false;
+  }
+
+  if (!Array.isArray(value.currencies)) {
+    return false;
+  }
+
+  for (const currency of value.currencies) {
+    if (
+      !isObject(currency) ||
+      typeof currency.code !== "string" ||
+      typeof currency.name !== "string" ||
+      typeof currency.symbol !== "string"
+    ) {
+      return false;
+    }
+  }
+
+  if (!Array.isArray(value.languages)) {
+    return false;
+  }
+
+  for (const language of value.languages) {
+    if (
+      !isObject(language) ||
+      typeof language.name !== "string" ||
+      typeof language.native_name !== "string"
+    ) {
+      return false;
+    }
+  }
+
+  if (!Array.isArray(value.borders)) {
+    return false;
+  }
+
+  if (
+    !value.borders.every(
+      (border): border is string => typeof border === "string"
+    )
+  ) {
+    return false;
+  }
 
   return true;
 }
-
-
 
 function isCountriesResponse(value: unknown): value is CountriesResponse {
   if (typeof value !== "object" || value === null) {
@@ -132,18 +206,19 @@ export async function getCountries() {
       }
     );
 
-  if (!response.ok) {
+    if (!response.ok) {
   throw new CountryApiError(
     "Failed to fetch countries",
     response.status
   );
-  }
+}
 
-  const result: unknown = await response.json();
+const result: unknown = await response.json();
 
-   if (!isCountriesResponse(result)) {
-     throw new Error("Invalid countries response");
-    }
+if (!isCountriesResponse(result)) {
+  throw new Error("Invalid countries response");
+}
+
     allCountries.push(...result.data.objects);
 
     if (!result.data.meta.more) {
@@ -169,7 +244,7 @@ export async function getCountryByCode(code: string) {
     "Country not found",
     404
   );
- }
+}
 
   return country;
 }

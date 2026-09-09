@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useReducer } from "react";
+import { useState } from "react";
 import type { Country, Region } from "@/types/country";
 import { useQuery } from "@tanstack/react-query";
 import { countriesQueryKey } from "@/lib/countries";
-import { CountryApiError } from "@/lib/countries";  
+import Image from "next/image";
 
 const regions: Region[] = [
   "Africa",
@@ -18,49 +18,6 @@ const regions: Region[] = [
 
 const PAGE_SIZE = 10;
 
-interface DashboardState {
-  search: string;
-  selectedRegion: Region | "";
-  page: number;
-}
-
-type DashboardAction =
-  | { type: "SET_SEARCH"; payload: string }
-  | { type: "SET_REGION"; payload: Region | "" }
-  | { type: "SET_PAGE"; payload: number };
-
-function dashboardReducer(
-  state: DashboardState,
-  action: DashboardAction
-): DashboardState {
-  switch (action.type) {
-    case "SET_SEARCH":
-      return {
-        ...state,
-        search: action.payload,
-        page: 1,
-      };
-
-    case "SET_REGION":
-      return {
-        ...state,
-        selectedRegion: action.payload,
-        page: 1,
-      };
-
-    case "SET_PAGE":
-      return {
-        ...state,
-        page: action.payload,
-      };
-
-    default: {
-      const exhaustiveCheck: never = action;
-      return exhaustiveCheck;
-    }
-  }
-}
-
 function isRegion(value: string): value is Region {
   return regions.some((region) => region === value);
 }
@@ -69,12 +26,9 @@ export default function CountryDashboard() {
   const fetchCountries = async (): Promise<Country[]> => {
     const response = await fetch("/api/countries");
 
-  if (!response.ok) {
-  throw new CountryApiError(
-    "Failed to fetch countries",
-    response.status
-  );
-}
+    if (!response.ok) {
+      throw new Error("Failed to fetch countries");
+    }
 
     return response.json();
   };
@@ -88,13 +42,10 @@ export default function CountryDashboard() {
     queryFn: fetchCountries,
   });
 
-const [state, dispatch] = useReducer(dashboardReducer, {
-  search: "",
-  selectedRegion: "",
-  page: 1,
-});
-
-const { search, selectedRegion, page } = state;
+  const [search, setSearch] = useState<string>("");
+  const [selectedRegion, setSelectedRegion] =
+    useState<Region | "">("");
+  const [page, setPage] = useState<number>(1);
 
   if (isLoading) {
     return (
@@ -167,45 +118,38 @@ const { search, selectedRegion, page } = state;
     startIndex + PAGE_SIZE
   );
 
-const handleSearchChange = (
-  event: React.ChangeEvent<HTMLInputElement>
-) => {
-  dispatch({
-    type: "SET_SEARCH",
-    payload: event.target.value,
-  });
-};
-const handleRegionChange = (
-  event: React.ChangeEvent<HTMLSelectElement>
-) => {
-  const value = event.target.value;
+  const handleSearchChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setSearch(event.target.value);
+    setPage(1);
+  };
 
-  if (value === "") {
-    dispatch({
-      type: "SET_REGION",
-      payload: "",
-    });
-  } else if (isRegion(value)) {
-    dispatch({
-      type: "SET_REGION",
-      payload: value,
-    });
-  }
-};
+  const handleRegionChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    const value = event.target.value;
 
-const handlePreviousPage = () => {
-  dispatch({
-    type: "SET_PAGE",
-    payload: Math.max(page - 1, 1),
-  });
-};
+    if (value === "") {
+      setSelectedRegion("");
+    } else if (isRegion(value)) {
+      setSelectedRegion(value);
+    }
 
-const handleNextPage = () => {
-  dispatch({
-    type: "SET_PAGE",
-    payload: Math.min(page + 1, totalPages),
-  });
-};
+    setPage(1);
+  };
+
+  const handlePreviousPage = () => {
+    setPage((currentPage) =>
+      Math.max(currentPage - 1, 1)
+    );
+  };
+
+  const handleNextPage = () => {
+    setPage((currentPage) =>
+      Math.min(currentPage + 1, totalPages)
+    );
+  };
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-sky-200 px-5 py-8 sm:px-8">
@@ -305,18 +249,22 @@ const handleNextPage = () => {
               >
                 <article className="flex items-center gap-4 rounded-2xl border border-white/80 bg-white/90 p-4 shadow-md shadow-sky-900/5 backdrop-blur-md transition duration-200 hover:-translate-y-1 hover:bg-white hover:shadow-xl sm:gap-6 sm:p-5">
                   {/* Flag */}
+
                   <div className="h-14 w-20 shrink-0 overflow-hidden rounded-xl bg-sky-50 shadow-sm sm:h-16 sm:w-24">
+
                     {country.flag.url_svg ? (
-                      <img
-                        src={country.flag.url_svg}
-                        alt={`${country.names.common} flag`}
-                        className="h-full w-full object-cover"
+                      <Image
+                       src={country.flag.url_svg}
+                       alt={`${country.names.common} flag`}
+                       width={240}
+                       height={160}
+                       className="h-full w-full object-cover"
                        />
-                       ) : (
-                          <div className="flex h-full w-full items-center justify-center text-xs text-sky-400">
-                         No flag
-                           </div>
-                          )}
+                      ) : (
+                      <div className="flex h-full w-full items-center justify-center">
+                       No flag available
+                    </div>
+                     )}
                   </div>
 
                   {/* Country information */}

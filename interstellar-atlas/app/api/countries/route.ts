@@ -9,7 +9,7 @@ export async function GET() {
     const countries = await getCountries();
 
     return NextResponse.json(countries);
-  }  catch (error) {
+  } catch (error) {
     if (error instanceof CountryApiError) {
       return NextResponse.json(
         { error: error.message },
@@ -21,5 +21,5 @@ export async function GET() {
       { error: "Failed to fetch countries" },
       { status: 500 }
     );
-  }}
-  
+  }
+}

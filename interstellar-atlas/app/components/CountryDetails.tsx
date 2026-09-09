@@ -4,6 +4,7 @@ import Link from "next/link";
 import { CountryApiError } from "@/lib/countries";
 import { useCountry } from "../hooks/useCountry";
 import { useCountriesByCodes } from "../hooks/useCountriesByCodes";
+import Image from "next/image";
 
 
 interface CountryDetailsProps {
@@ -14,16 +15,16 @@ export default function CountryDetails({
   code,
 }: CountryDetailsProps) {
   const {
-  data: country,
-  isLoading,
-  isError,
-  error,
-} = useCountry(code);
+    data: country,
+    isLoading,
+    isError,
+    error,
+  } = useCountry(code);
 
-const {
-  data: borderCountries = [],
-  isLoading: isBordersLoading,
-} = useCountriesByCodes(country?.borders ?? []);
+  const {
+    data: borderCountries = [],
+    isLoading: isBordersLoading,
+  } = useCountriesByCodes(country?.borders ?? []);
 
   if (isLoading) {
     return (
@@ -43,7 +44,7 @@ const {
     );
   }
 
-if (isError || !country) {
+ if (isError || !country) {
   const status =
     error instanceof CountryApiError
       ? error.status
@@ -123,17 +124,19 @@ if (isError || !country) {
           <div className="relative flex flex-col gap-8 sm:flex-row sm:items-center">
             {/* Flag */}
             <div className="overflow-hidden rounded-2xl bg-white shadow-xl sm:h-40 sm:w-60">
-              {country.flag.url_svg ? (
-              <img
-               src={country.flag.url_svg}
-               alt={`${country.names.common} flag`}
-              className="h-full w-full object-cover"
-              />
+                {country.flag.url_svg ? (
+                <Image
+                 src={country.flag.url_svg}
+                 alt={`${country.names.common} flag`}
+                 width={240}
+                 height={160}
+                 className="h-full w-full object-cover"
+                 />
                 ) : (
-             <div className="flex h-full w-full items-center justify-center text-xs text-sky-400">
-             No flag
-            </div>
-             )}
+                  <div className="flex h-full w-full items-center justify-center">
+                        No flag available
+                </div>
+              )}
             </div>
 
             {/* Country heading */}
