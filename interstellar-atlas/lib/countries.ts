@@ -27,6 +27,7 @@ interface CountriesResponse {
   };
 }
 
+// Validate unknown API data before treating it as a Country.
 function isCountry(value: unknown): value is Country {
   if (typeof value !== "object" || value === null) {
     return false;
