@@ -18,6 +18,7 @@ const regions: Region[] = [
 export function isRegion(value: string): value is Region {
   return regions.some((region) => region === value);
 }
+
 interface NativeName {
   common: string;
   official: string;
@@ -43,19 +44,14 @@ export interface Country {
     common: string;
     native: Record<string, NativeName>;
   };
-
   flag: {
     url_svg: string;
   };
-
   population: number;
-
   codes: {
-  alpha_3: string;
-};
-
+    alpha_3: string;
+  };
   region: Region;
-
   subregion: string;
   capitals: Capital[];
   tlds: string[];

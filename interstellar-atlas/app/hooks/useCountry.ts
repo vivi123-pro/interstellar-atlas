@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import type { Country } from "@/types/country";
+import { CountryApiError } from "@/lib/countries";
 
 const countryQueryKey = (code: string) =>
   ["country", code] as const;
@@ -10,7 +11,10 @@ async function fetchCountry(code: string): Promise<Country> {
   const response = await fetch(`/api/countries/${code}`);
 
   if (!response.ok) {
-    throw new Error("Failed to fetch country");
+    throw new CountryApiError(
+      "Failed to fetch country",
+      response.status
+    );
   }
 
   return response.json();
